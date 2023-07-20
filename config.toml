@@ -1,0 +1,18 @@
+port = 49153
+
+[session]
+    [session.server_user]
+        name = "server"  # The account used by the server for announcements.
+        password = "admin"
+
+    [session.database]
+        db = "messenger.db"
+        allow_user_creation = true
+        max_shown_messages = 200
+        message_character_limit = 200
+        username_character_limit = 20
+
+    [session.announcements]
+        leave = "{user} has left."
+        join = "{user} has joined."
+        abrupt_leave = "{user} left unexpectedly."

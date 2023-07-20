@@ -2,6 +2,8 @@ import time
 from errors import SessionError
 import sqlite3
 from twisted.python import log
+import toml
+from constants import CONFIG_FILE
 
 
 class User:
@@ -13,25 +15,6 @@ class User:
 
     def __repr__(self):
         return f"User({self.name})"
-
-
-SERVER_USER_NAME = "server"
-SERVER_USER_PASSWORD = "admin"
-# The user the server will log in as to give out updates.
-
-ALLOW_USER_CREATION = True
-MESSAGE_CHARACTER_LIMIT = 500  # Setting either of these AFTER a table is created will require you to
-USERNAME_CHARACTER_LIMIT = 25  # drop those tables for changes to take effect!
-MAX_SHOWN_MESSAGES = 200  # Amount of messages to send to the clients.
-LEAVE_MESSAGE = "{user} has left."
-JOIN_MESSAGE = "{user} has joined."
-ABRUPT_LEAVE_MESSAGE = "{user} left unexpectedly."
-DATABASE = "messenger.db"
-GENERATE_DATABASE_QUERIES = [
-    f'CREATE TABLE IF NOT EXISTS users(name text PRIMARY KEY, password text NOT NULL CHECK(typeof("name") = "text" AND length("name") <= {USERNAME_CHARACTER_LIMIT}));',
-    f'CREATE TABLE IF NOT EXISTS messages(id integer PRIMARY KEY AUTOINCREMENT, message text NOT NULL, timestamp integer NOT NULL, sender text NOT NULL, FOREIGN KEY(sender) REFERENCES users(name) CHECK(typeof("message") = "text" AND length("message") <= {MESSAGE_CHARACTER_LIMIT}));',
-    f"INSERT OR IGNORE INTO users(name, password) VALUES('{SERVER_USER_NAME}', '{SERVER_USER_PASSWORD}');"
-]
 
 
 class Message:
@@ -60,11 +43,42 @@ class Message:
 
 class ServerSession:
     def __init__(self):
-        self.con = sqlite3.connect(DATABASE)
+        self.server_user_name = None
+        self.server_user_pass = None
+        self.allow_user_creation = None
+        self.msg_char_limit = None
+        self.name_char_limit = None
+        self.max_shown_messages = None
+        self.leave_announcement = None
+        self.join_announcement = None
+        self.abrupt_leave_announcement = None
+        self.database = None
+        self.get_toml_config()
+
+        self.con = sqlite3.connect(self.database)
         self.generate_database()
         self.logged_in_users = {}  # Relate twister protocol instances to users.
-        self.server_user = self.login_user(SERVER_USER_NAME, SERVER_USER_PASSWORD, None)
+        self.server_user = self.login_user(self.server_user_name, self.server_user_pass, None)
         log.msg("Server successfully logged in.")
+
+    def get_toml_config(self, name=CONFIG_FILE):
+        """
+        Gets the toml config file and populates needed variables with the values.
+        :param name:
+        :return:
+        """
+        config = toml.load(name)
+        # Filthy, yes.
+        self.server_user_name = config['session']['server_user']['name']
+        self.server_user_pass = config['session']['server_user']['password']
+        self.database = config['session']['database']['db']
+        self.allow_user_creation = config['session']['database']['allow_user_creation']
+        self.msg_char_limit = config['session']['database']['message_character_limit']
+        self.name_char_limit = config['session']['database']['username_character_limit']
+        self.max_shown_messages = config['session']['database']['max_shown_messages']
+        self.leave_announcement = config['session']['announcements']['leave']
+        self.join_announcement = config['session']['announcements']['join']
+        self.abrupt_leave_announcement = config['session']['announcements']['abrupt_leave']
 
     def generate_database(self):
         """
@@ -72,7 +86,12 @@ class ServerSession:
         :return:
         """
         log.msg("Generating database...")
-        for query in GENERATE_DATABASE_QUERIES:
+        generate_database_queries = [
+            f'CREATE TABLE IF NOT EXISTS users(name text PRIMARY KEY, password text NOT NULL CHECK(typeof("name") = "text" AND length("name") <= {self.name_char_limit}));',
+            f'CREATE TABLE IF NOT EXISTS messages(id integer PRIMARY KEY AUTOINCREMENT, message text NOT NULL, timestamp integer NOT NULL, sender text NOT NULL, FOREIGN KEY(sender) REFERENCES users(name) CHECK(typeof("message") = "text" AND length("message") <= {self.msg_char_limit}));',
+            f"INSERT OR IGNORE INTO users(name, password) VALUES('{self.server_user_name}', '{self.server_user_pass}');"
+        ]
+        for query in generate_database_queries:
             cur = self.con.cursor()
             print(query)
             cur.execute(query)
@@ -85,8 +104,8 @@ class ServerSession:
         :param protocol:
         :return:
         """
-        if len(message.content) > MESSAGE_CHARACTER_LIMIT:
-            raise SessionError(f"Message is over {MESSAGE_CHARACTER_LIMIT} characters, not logging.")
+        if len(message.content) > self.msg_char_limit:
+            raise SessionError(f"Message is over {self.msg_char_limit} characters, not logging.")
 
         self.insert_message_into_database(self.logged_in_users[protocol], message.content, message.timestamp)
 
@@ -144,15 +163,20 @@ class ServerSession:
         del self.logged_in_users[protocol]
         return user.name
 
-    def get_message_log(self, length=MAX_SHOWN_MESSAGES):
+    def get_message_log(self, length=None):
         """
         Gets the message log up to a certain length, default being the set variable MAX_SHOWN_MESSAGES.
         :param length:
         :return:
         """
-        query = f"SELECT * FROM messages LIMIT {length};"
+        # Set our default parameter.
+        if length is None:
+            length = self.max_shown_messages
+
+        query = f"SELECT * FROM messages ORDER BY id DESC LIMIT {length};"
         cur = self.con.cursor()
         messages = cur.execute(query).fetchall()
+        print(messages)
         result = []
         for message in messages:
             result.append(self.from_database_to_message_instance(message))

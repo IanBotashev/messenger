@@ -1,5 +1,4 @@
 import sys
-
 from twisted.internet import protocol, reactor
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from session import *
@@ -7,6 +6,8 @@ from message import *
 from twisted.python import log
 import traceback
 from errors import SessionError
+import toml
+from constants import CONFIG_FILE
 
 
 class MessagingProtocol(protocol.Protocol):
@@ -32,7 +33,7 @@ class MessagingProtocol(protocol.Protocol):
         log.msg(f"Connection lost. {reason!r}")
         if self.logged_in:
             user = self.session.logout_user(self)
-            self.send_server_message(ABRUPT_LEAVE_MESSAGE.format(user=user))
+            self.send_server_message(self.session.abrupt_leave_announcement.format(user=user))
 
     def handle_message(self, data):
         """
@@ -51,7 +52,7 @@ class MessagingProtocol(protocol.Protocol):
                 log.msg("Syncing login message logs...")
                 log.msg(self.session.logged_in_users)
                 self.logged_in = True
-                self.send_server_message(JOIN_MESSAGE.format(user=message.user))
+                self.send_server_message(self.session.join_announcement.format(user=message.user))
 
             case MessageType.LOGOUT_REQUEST:
                 if not self.logged_in:
@@ -59,7 +60,7 @@ class MessagingProtocol(protocol.Protocol):
 
                 user = self.session.logout_user(self)
                 self.logged_in = False
-                self.send_server_message(LEAVE_MESSAGE.format(user=user))
+                self.send_server_message(self.session.leave_announcement.format(user=user))
 
             case MessageType.LOG_MESSAGE:
                 if not self.logged_in:
@@ -118,6 +119,6 @@ class MessagingFactory(protocol.ServerFactory):
 
 if __name__ == "__main__":
     log.startLogging(sys.stdout)
-    endpoint = TCP4ServerEndpoint(reactor, STANDARD_PORT)
+    endpoint = TCP4ServerEndpoint(reactor, toml.load(CONFIG_FILE)['port'])
     endpoint.listen(MessagingFactory())
     reactor.run()
