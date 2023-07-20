@@ -1,0 +1,2 @@
+Twisted>=22.10.0
+customtkinter>=5.2.0
