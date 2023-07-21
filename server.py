@@ -2,12 +2,13 @@ import sys
 from twisted.internet import protocol, reactor
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from session import *
-from message import *
+from packet import *
 from twisted.python import log
 import traceback
 from errors import SessionError
 import toml
 from constants import CONFIG_FILE
+from sqlite3 import IntegrityError
 
 
 class MessagingProtocol(protocol.Protocol):
@@ -41,10 +42,10 @@ class MessagingProtocol(protocol.Protocol):
         :param data:
         :return:
         """
-        message = JsonMessage.decode(data)
+        message = JsonPacket.decode(data)
         log.msg(f"Handling message: {message}")
         match message.type:
-            case MessageType.LOGIN_REQUEST:
+            case PacketType.LOGIN_REQUEST:
                 if self.logged_in:
                     raise SessionError("Already logged in!")
 
@@ -54,7 +55,7 @@ class MessagingProtocol(protocol.Protocol):
                 self.logged_in = True
                 self.send_server_message(self.session.join_announcement.format(user=message.user))
 
-            case MessageType.LOGOUT_REQUEST:
+            case PacketType.LOGOUT_REQUEST:
                 if not self.logged_in:
                     raise SessionError("You need to login first.")
 
@@ -62,20 +63,20 @@ class MessagingProtocol(protocol.Protocol):
                 self.logged_in = False
                 self.send_server_message(self.session.leave_announcement.format(user=user))
 
-            case MessageType.LOG_MESSAGE:
+            case PacketType.LOG_MESSAGE:
                 if not self.logged_in:
                     raise SessionError("You need to be logged in to send messages.")
 
                 self.session.log_message(message, self)
                 self.update_all_client_logs(self.session.get_latest_message())
 
-            case MessageType.MESSAGE_LOG_SET_REQUEST:
+            case PacketType.MESSAGE_LOG_SET_REQUEST:
                 if not self.logged_in:
                     raise SessionError("You need to be logged in to see messages.")
 
                 self.transport.write(message_log_set(self.session.get_message_log()).encode())
 
-            case MessageType.CREATE_USER:
+            case PacketType.CREATE_USER:
                 self.session.create_new_user(message.username, message.password)
 
             case _:

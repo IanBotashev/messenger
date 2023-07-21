@@ -1,14 +1,12 @@
 import sys
-
 from CTkMessagebox import CTkMessagebox
-
-from message import JsonMessage, MessageType, STANDARD_PORT
+from packet import JsonPacket, PacketType, STANDARD_PORT
 from twisted.internet import reactor, tksupport
 from twisted.python import log
 from twisted.internet.protocol import Protocol, ClientFactory
 import customtkinter
-from tkinter import messagebox
 from client_gui import ClientApp
+from session import Message
 
 
 class Client(Protocol):
@@ -22,14 +20,16 @@ class Client(Protocol):
         tksupport.install(self.gui)
 
     def dataReceived(self, data):
-        message = JsonMessage.decode(data)
-        if message.type == MessageType.MESSAGE_LOG_ADDITION:
-            self.gui.message_box.add_message(message.content)
-        elif message.type == MessageType.MESSAGE_LOG_SET:
-            self.gui.message_box.set_message_log(message.content)
-        elif message.type == MessageType.ERROR:
+        message = JsonPacket.decode(data)
+        if message.type == PacketType.MESSAGE_LOG_ADDITION:
+            message_instance = Message.from_string(message.content)
+            self.gui.message_box.add_message(message_instance)
+        elif message.type == PacketType.MESSAGE_LOG_SET:
+            log_ = JsonPacket.decode_message_log(message.content)
+            self.gui.message_box.set_message_log(log_)
+        elif message.type == PacketType.ERROR:
             CTkMessagebox(title="Session Error", message=message.content, icon="warning", master=self.gui)
-        elif message.type == MessageType.SUCCESS:
+        elif message.type == PacketType.SUCCESS:
             CTkMessagebox(title="Success", message="Success!", icon="check", master=self.gui)
 
 
@@ -50,6 +50,8 @@ class MessagingClientFactory(ClientFactory):
 
 if __name__ == "__main__":
     log.startLogging(sys.stdout)
+    # dialog = customtkinter.CTkInputDialog(text="Type in host", title="Host Selection")
     reactor.connectTCP("192.168.1.90", STANDARD_PORT, MessagingClientFactory())
+    # dialog.tk.quit()
     reactor.run()
     sys.exit()

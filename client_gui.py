@@ -1,10 +1,7 @@
-import tkinter
-
 import customtkinter
 from tkinter import *
 from twisted.internet import reactor
-from twisted.python import log
-from message import *
+from packet import *
 
 
 class CredentialsPopup(customtkinter.CTkToplevel):
@@ -195,7 +192,7 @@ class ClientApp(customtkinter.CTk):
         submit_button = customtkinter.CTkButton(
             entry_box_frame,
             font=("Arial", 25),
-            text="Submit",
+            text="Send",
             command=self.log_message,
         )
         self.bind("<Return>", self.log_message)

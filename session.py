@@ -14,7 +14,7 @@ class User:
         return type(other) == type(self) and self.name == other.name
 
     def __repr__(self):
-        return f"User({self.name})"
+        return f"{self.name}"
 
 
 class Message:
@@ -38,7 +38,18 @@ class Message:
         return self.timestamp < other.timestamp
 
     def __repr__(self):
-        return f"Message({self.id}, {self.sender}, {self.message!r})"
+        return f"{self.id}:{self.sender.name}:{self.message}:{self.timestamp}"
+
+    @staticmethod
+    def from_string(string):
+        """
+        converts into this class from a string
+        :param string:
+        :return:
+        """
+        args = string.split(":")
+        print(args)
+        return Message(int(args[0]), User(args[1]), args[2], args[3])
 
 
 class ServerSession:
@@ -200,6 +211,9 @@ class ServerSession:
         :param password:
         :return:
         """
+        if len(username) > self.name_char_limit:
+            raise SessionError("Username too long. Did not create user.")
+
         query = "INSERT INTO users(name, password) VALUES (?, ?);"
         cur = self.con.cursor()
         cur.execute(query, (username, password))
