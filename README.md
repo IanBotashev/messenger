@@ -44,7 +44,7 @@ Using just docker:
 docker build -t messenger-server .
 docker run -p 49153:49153 -v {FULL_PATH}/persistent:/app/persistent -it messenger-server
 ```
-Note: It's entirely possible to switch where to mount the volume, this is just an example.
+Note: It's entirely possible to switch where to mount the volume and which port to run on, this is just an example.
 
 ## Server config.toml
 Example config.toml file for a server.  
