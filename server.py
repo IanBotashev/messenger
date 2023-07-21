@@ -27,8 +27,8 @@ class MessagingProtocol(protocol.Protocol):
             log.err(f"Session Error: {str(e)}")
             self.transport.write(error_message(str(e)).encode())
         except zlib.error as e:
-            log.err("\nClient seems to be broken. Notifying and breaking connection.\n")
-            message = "Your client seems to broken or malformed."
+            log.err("Client seems to be broken. Notifying and breaking connection.")
+            message = "\nYour client seems to broken or malformed.\n"
             self.transport.write(error_message(message).encode())
             self.transport.write(message.encode())  # Sending as plaintext so it pops up in their console.
             self.transport.loseConnection()
