@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 import sys
-from CTkMessagebox import CTkMessagebox
 from packet import JsonPacket, PacketType
 from constants import STANDARD_PORT
 from twisted.internet import reactor, tksupport
 from twisted.python import log
 from twisted.internet.protocol import Protocol, ClientFactory
 import customtkinter
-from client_gui import ClientApp
+from client_gui import ClientApp, Popup
 from session import Message
 import traceback
 import argparse
@@ -16,6 +15,7 @@ import argparse
 class Client(Protocol):
     def __init__(self):
         self.gui = None
+
     def connectionMade(self):
         customtkinter.set_default_color_theme("blue")
         customtkinter.set_appearance_mode("dark")
@@ -32,11 +32,11 @@ class Client(Protocol):
                 log_ = JsonPacket.decode_message_log(message.content)
                 self.gui.message_box.set_message_log(log_)
             elif message.type == PacketType.ERROR:
-                CTkMessagebox(title="Session Error", message=message.content, icon="warning", master=self.gui)
+                Popup(title="Session Error", text=message.content, master=self.gui)
             elif message.type == PacketType.SUCCESS:
-                CTkMessagebox(title="Success", message="Success!", icon="check", master=self.gui)
+                Popup(title="Success", text="Success.", master=self.gui)
         except Exception as e:
-            CTkMessagebox(title="Client Error", message="Something went wrong with the client. Try again.", icon="cancel", master=self.gui)
+            Popup(title="Client Error", text="An error has occurred with the client.", master=self.gui)
             traceback.print_exc()
 
 

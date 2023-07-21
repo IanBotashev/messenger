@@ -32,3 +32,9 @@
 **/values.dev.yaml
 LICENSE
 README.md
+client.py
+client_gui.py
+persistent
+messenger.db
+server.log
+

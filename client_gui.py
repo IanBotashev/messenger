@@ -4,6 +4,45 @@ from twisted.internet import reactor
 from packet import *
 
 
+class Popup(customtkinter.CTkToplevel):
+    def __init__(self, master, text, title="Credentials", *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.master = master
+        x = self.master.winfo_x()
+        y = self.master.winfo_y()
+        self.geometry("+%d+%d" % (x + 500, y + 100))
+        self.text = text
+        self.attributes("-topmost", True)
+        self.resizable(False, False)
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        self.title(title)
+        self.lift()
+        self.after(10, self.create_widgets)
+        self.grab_set()
+
+    def create_widgets(self):
+        """
+        Creates the username and password widgets.
+        :return:
+        """
+        text_label = customtkinter.CTkLabel(
+            master=self,
+            width=150,
+            wraplength=150,
+            fg_color="transparent",
+            text=self.text,
+            font=("Arial", 25)
+        )
+        text_label.grid(row=0, column=0, padx=(15, 0), pady=15, columnspan=2)
+
+        close_button = customtkinter.CTkButton(self, text="Ok", command=self.on_closing)
+        close_button.grid(row=1, column=0, padx=15, pady=15)
+
+    def on_closing(self):
+        self.grab_release()
+        self.destroy()
+
 class CredentialsPopup(customtkinter.CTkToplevel):
     def __init__(self, master, title="Credentials", username_prompt="Username", password_prompt="Password", *args, **kwargs):
         super().__init__(*args, **kwargs)
