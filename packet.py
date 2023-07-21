@@ -1,14 +1,10 @@
 import copy
 import time
 from enum import Enum
-import pickle
 import json
 import zlib
 import base64
 from session import Message
-
-
-STANDARD_PORT = 49153
 
 
 class PacketType(Enum):

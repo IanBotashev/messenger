@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 import sys
-import zlib
-
 from twisted.internet import protocol, reactor
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from session import *
@@ -29,10 +27,10 @@ class MessagingProtocol(protocol.Protocol):
             log.err(f"Session Error: {str(e)}")
             self.transport.write(error_message(str(e)).encode())
         except zlib.error as e:
-            log.err("Client seems to be broken. Notifying and breaking connection.")
+            log.err("\nClient seems to be broken. Notifying and breaking connection.\n")
             message = "Your client seems to broken or malformed."
-            self.transport.write(message.encode())  # Sending as plaintext so it pops up in their console.
             self.transport.write(error_message(message).encode())
+            self.transport.write(message.encode())  # Sending as plaintext so it pops up in their console.
             self.transport.loseConnection()
         except Exception as e:
             log.err(e, "".join(traceback.format_exception(e)))
@@ -127,7 +125,7 @@ class MessagingFactory(protocol.ServerFactory):
 
 
 if __name__ == "__main__":
-    log.startLogging(sys.stdout)
+    log.startLogging(open(toml.load(CONFIG_FILE)['log_file'], 'w'))
     endpoint = TCP4ServerEndpoint(reactor, toml.load(CONFIG_FILE)['port'])
     endpoint.listen(MessagingFactory())
     reactor.run()

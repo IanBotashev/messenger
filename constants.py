@@ -1,1 +1,2 @@
 CONFIG_FILE = "config.toml"
+STANDARD_PORT = 49153

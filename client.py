@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import sys
 from CTkMessagebox import CTkMessagebox
-from packet import JsonPacket, PacketType, STANDARD_PORT
+from packet import JsonPacket, PacketType
+from constants import STANDARD_PORT
 from twisted.internet import reactor, tksupport
 from twisted.python import log
 from twisted.internet.protocol import Protocol, ClientFactory

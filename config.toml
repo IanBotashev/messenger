@@ -1,4 +1,5 @@
 port = 49153
+log_file = "server.log"
 
 [session]
     [session.server_user]

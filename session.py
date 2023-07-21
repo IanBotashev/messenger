@@ -105,8 +105,9 @@ class ServerSession:
         ]
         for query in generate_database_queries:
             cur = self.con.cursor()
-            print(query)
+            log.msg(query)
             cur.execute(query)
+            cur.close()
         self.con.commit()
 
     def log_message(self, message, protocol):
@@ -141,6 +142,7 @@ class ServerSession:
         cur = self.con.cursor()
         cur.execute(query, (message, timestamp, sender.name))
         self.con.commit()
+        cur.close()
 
     def login_user(self, user, password, protocol):
         """
@@ -151,8 +153,9 @@ class ServerSession:
         :param protocol:
         :return:
         """
-        cur = self.con.cursor()
         query = "SELECT name FROM users WHERE name=? AND password=?;"
+
+        cur = self.con.cursor()
         user = cur.execute(query, (user, password)).fetchone()
         if not user:
             raise SessionError("Username or Password incorrect. Please try again.")
@@ -161,7 +164,7 @@ class ServerSession:
         if login_user in self.logged_in_users.values():
             raise SessionError(f"Account {user[0]!r} is already logged in.")
         self.logged_in_users[protocol] = login_user
-
+        cur.close()
         return login_user
 
     def logout_user(self, protocol):
@@ -188,11 +191,10 @@ class ServerSession:
         query = f"SELECT * FROM messages ORDER BY id DESC LIMIT {length};"
         cur = self.con.cursor()
         messages = cur.execute(query).fetchall()
-        print(messages)
         result = []
         for message in messages:
             result.append(self.from_database_to_message_instance(message))
-
+        cur.close()
         return result
 
     def get_latest_message(self):
@@ -203,6 +205,7 @@ class ServerSession:
         query = "SELECT * FROM messages ORDER BY id DESC LIMIT 1;"
         cur = self.con.cursor()
         latest_message = cur.execute(query).fetchone()
+        cur.close()
         return self.from_database_to_message_instance(latest_message)
 
     def create_new_user(self, username, password):
@@ -215,10 +218,25 @@ class ServerSession:
         if len(username) > self.name_char_limit:
             raise SessionError("Username too long. Did not create user.")
 
+        if username in self.get_all_usernames():
+            raise SessionError("Username already taken.")
+
         query = "INSERT INTO users(name, password) VALUES (?, ?);"
         cur = self.con.cursor()
         cur.execute(query, (username, password))
         self.con.commit()
+        cur.close()
+
+    def get_all_usernames(self):
+        """
+        Gets all the usernames currently taken in the database
+        :return:
+        """
+        query = "SELECT name FROM users;"
+        cur = self.con.cursor()
+        users = cur.execute(query).fetchall()
+        cur.close()
+        return users
 
     @staticmethod
     def from_database_to_message_instance(db_tuple):
