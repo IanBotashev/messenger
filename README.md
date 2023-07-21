@@ -21,7 +21,7 @@ pip3 install -r requirements.txt
 ### Client
 To run the client, use the following command:
 ```shell
-./client.py
+./client.py -ht HOST [-p PORT]
 ```
 
 ### Server
