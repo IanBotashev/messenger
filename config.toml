@@ -1,5 +1,5 @@
 port = 49153
-log_file = "server.log"
+log_file = "persistent/server.log"
 
 [session]
     [session.server_user]
@@ -7,7 +7,7 @@ log_file = "server.log"
         password = "admin"
 
     [session.database]
-        db = "messenger.db"
+        db = "persistent/messenger.db"
         allow_user_creation = true
         max_shown_messages = 100
         message_character_limit = 200
