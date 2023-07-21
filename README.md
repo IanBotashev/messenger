@@ -25,17 +25,15 @@ To run the client, use the following command:
 ```
 
 ### Server
+#### Terminal
 To run the server on your machine you first must create a new folder titled "persistent" 
-(or change the `config.toml` lines `log_file` and `session.database.db` to not have the `persistent/` prefix. Note: this won't work for docker.)
+(or change the `config.toml` lines `log_file` and `session.database.db` to not have the `persistent/`)
 ```shell
-mkdir persistent
-```
-
-To run in the console:
-```shell
+mkdir persistent 
 ./server.py
 ```
 
+#### Docker
 Using docker compose:
 ```shell
 docker compose up
@@ -44,15 +42,16 @@ docker compose up
 Using just docker:
 ```shell
 docker build -t messenger-server .
-docker run -p 49153:49153 -v {FULL_PATH_TO}/persistent:/app/persistent -it messenger-server
+docker run -p 49153:49153 -v {FULL_PATH}/persistent:/app/persistent -it messenger-server
 ```
+Note: It's entirely possible to switch where to mount the volume, this is just an example.
 
 ## Server config.toml
 Example config.toml file for a server.  
 Any changes to the settings file require a server reboot.
 ```toml
 port = 49153  # Port to host on. Standard is 49153. Only matters outside of a docker installation.
-log_file = "persistent/server.log"  # persistent can be removed, but will be incompatible with docker.
+log_file = "persistent/server.log" # For local installations, this can be changed to anywhere.
 
 # Session settings.
 [session]
