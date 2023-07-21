@@ -1,5 +1,5 @@
 port = 49153  # Port to host on. Standard is 49153. Only matters outside of a docker installation.
-log_file = "persistent/server.log"  # persistent can be removed, but will be incompatible with docker.
+log_file = "persistent/server.log" # For local installations, this can be changed to anywhere.
 
 # Session settings.
 [session]
