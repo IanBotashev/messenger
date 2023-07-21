@@ -13,7 +13,6 @@ import traceback
 class Client(Protocol):
     def __init__(self):
         self.gui = None
-
     def connectionMade(self):
         customtkinter.set_default_color_theme("blue")
         customtkinter.set_appearance_mode("dark")
@@ -55,8 +54,7 @@ class MessagingClientFactory(ClientFactory):
 
 if __name__ == "__main__":
     log.startLogging(sys.stdout)
-    # dialog = customtkinter.CTkInputDialog(text="Type in host", title="Host Selection")
-    reactor.connectTCP("192.168.1.90", STANDARD_PORT, MessagingClientFactory())
-    # dialog.tk.quit()
+    host = input("Server Host> ")
+    reactor.connectTCP(host, STANDARD_PORT, MessagingClientFactory())
     reactor.run()
     sys.exit()
