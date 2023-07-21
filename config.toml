@@ -8,7 +8,7 @@ port = 49153
     [session.database]
         db = "messenger.db"
         allow_user_creation = true
-        max_shown_messages = 10
+        max_shown_messages = 100
         message_character_limit = 200
         username_character_limit = 20
 

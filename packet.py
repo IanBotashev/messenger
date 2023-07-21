@@ -75,7 +75,6 @@ class JsonPacket:
         decompiled_list = json.loads(string)
         result = []
         for string in decompiled_list:
-            print("a", string)
             result.append(Message.from_string(string))
 
         return result
