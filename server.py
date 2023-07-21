@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 from twisted.internet import protocol, reactor
 from twisted.internet.endpoints import TCP4ServerEndpoint
@@ -8,7 +9,6 @@ import traceback
 from errors import SessionError
 import toml
 from constants import CONFIG_FILE
-from sqlite3 import IntegrityError
 
 
 class MessagingProtocol(protocol.Protocol):

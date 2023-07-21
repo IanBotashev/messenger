@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import sys
 from CTkMessagebox import CTkMessagebox
 from packet import JsonPacket, PacketType, STANDARD_PORT
@@ -33,7 +34,7 @@ class Client(Protocol):
             elif message.type == PacketType.SUCCESS:
                 CTkMessagebox(title="Success", message="Success!", icon="check", master=self.gui)
         except Exception as e:
-            CTkMessagebox(title="Client Error", message="Something went wrong with the client. Try again.", icon="close", master=self.gui)
+            CTkMessagebox(title="Client Error", message="Something went wrong with the client. Try again.", icon="cancel", master=self.gui)
             traceback.print_exc()
 
 
@@ -53,8 +54,8 @@ class MessagingClientFactory(ClientFactory):
 
 
 if __name__ == "__main__":
+    host = input("Connect to Host>")
     log.startLogging(sys.stdout)
-    host = input("Server Host> ")
     reactor.connectTCP(host, STANDARD_PORT, MessagingClientFactory())
     reactor.run()
     sys.exit()
