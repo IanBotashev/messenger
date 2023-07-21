@@ -35,6 +35,6 @@ README.md
 client.py
 client_gui.py
 persistent
-messenger.db
-server.log
+persistent/messenger.db
+persistent/server.log
 
