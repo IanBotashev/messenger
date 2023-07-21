@@ -236,23 +236,43 @@ class ClientApp(customtkinter.CTk):
         """
 
     def on_quit(self):
+        """
+        When the user presses the "quit" button.
+        :return:
+        """
         reactor.stop()
         self.quit()
 
     def resend_message_log(self):
+        """
+        When the user presses the "reload" button.
+        :return:
+        """
         self.client.transport.write(message_log_set_request().encode())
 
     def login_popup(self):
+        """
+        When the user presses the "login" button.
+        :return:
+        """
         dialog = CredentialsPopup(self, title="Login")
         credentials = dialog.get_credentials()
         if credentials is not None:
             self.client.transport.write(login_message(credentials[0], credentials[1]).encode())
 
     def logout(self):
+        """
+        When the user presses the "logout" button.
+        :return:
+        """
         self.client.transport.write(logout_message().encode())
         self.message_box.clear()
 
     def create_user_popup(self):
+        """
+        When the user presses the "Create user" button.
+        :return:
+        """
         dialog = CredentialsPopup(
             self,
             title="Create new user",
@@ -264,5 +284,12 @@ class ClientApp(customtkinter.CTk):
             self.client.transport.write(create_user(credentials[0], credentials[1]).encode())
 
     def log_message(self, event=None):
+        """
+        When the user presses the "send" button.
+        The reason for the empty "event" variable is because the Tkinter method bind to bind a keybind will
+        pass in the extra variable, which we don't actually use, so it gets ignored.
+        :param event:
+        :return:
+        """
         self.client.transport.write(log_message(self.entry.get()).encode())
         self.entry.delete(0, END)

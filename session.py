@@ -54,16 +54,17 @@ class Message:
 
 class ServerSession:
     def __init__(self):
-        self.server_user_name = None
-        self.server_user_pass = None
-        self.allow_user_creation = None
-        self.msg_char_limit = None
-        self.name_char_limit = None
-        self.max_shown_messages = None
-        self.leave_announcement = None
-        self.join_announcement = None
-        self.abrupt_leave_announcement = None
-        self.database = None
+        # Default settings.
+        self.server_user_name = "server"
+        self.server_user_pass = "admin"
+        self.allow_user_creation = False
+        self.msg_char_limit = 200
+        self.name_char_limit = 20
+        self.max_shown_messages = 200
+        self.leave_announcement = "{user} has left."
+        self.join_announcement = "{user} has joined."
+        self.abrupt_leave_announcement = "{user} left unexpectedly."
+        self.database = "messenger.db"
         self.get_toml_config()
 
         self.con = sqlite3.connect(self.database)

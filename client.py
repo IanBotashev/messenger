@@ -9,6 +9,7 @@ import customtkinter
 from client_gui import ClientApp
 from session import Message
 import traceback
+import argparse
 
 
 class Client(Protocol):
@@ -54,8 +55,16 @@ class MessagingClientFactory(ClientFactory):
 
 
 if __name__ == "__main__":
-    host = input("Connect to Host>")
+    # For terminal usage.
+    parser = argparse.ArgumentParser(
+        prog="client.py",
+        description="Connects to a messenger server with a GUI."
+    )
+    parser.add_argument('-ht', '--host', required=True)
+    parser.add_argument('-p', '--port', default=STANDARD_PORT)
+    args = parser.parse_args()
+
     log.startLogging(sys.stdout)
-    reactor.connectTCP(host, STANDARD_PORT, MessagingClientFactory())
+    reactor.connectTCP(args.host, args.port, MessagingClientFactory())
     reactor.run()
     sys.exit()
