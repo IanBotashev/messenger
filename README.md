@@ -4,15 +4,15 @@ Uses a hand-made, server-client protocol to store messages in a central server.
 Servers can be self-hosted, and support a multitude of settings.
 
 ## Installation
-1. Clone this github repository to your machine.
+Clone this github repository to your machine.
 ```shell
 git clone https://github.com/IanBotashev/messenger
 ```
-2. Change directory to the newly created directory (most likely `messenger`).
+Change directory to the newly created directory (most likely `messenger`).
 ```shell
 cd messenger
 ```
-3. Install all required python packages (you might either use `pip` or `pip3`).
+Install all required python packages (you might either use `pip` or `pip3`).
 ```shell
 pip3 install -r requirements.txt
 ```
@@ -51,6 +51,7 @@ Any changes to the settings file require a server reboot.
 ```toml
 # Put this file in the same directory as the server.
 port = 49153  # Port to host on. Standard is 49153. Only matters outside of a docker installation.
+server_name = "Messenger Server"  # Name of this server to be shown to clients
 
 [structure]
     data_folder= "./persistent"  # Path to the directory to put our data in. If one doesn't exist, it will created.

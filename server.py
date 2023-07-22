@@ -86,6 +86,17 @@ class MessagingProtocol(protocol.Protocol):
             case PacketType.CREATE_USER:
                 self.session.create_new_user(message.username, message.password)
 
+            case PacketType.SERVER_INFO_REQUEST:
+                self.transport.write(
+                    server_info(
+                        self.session.server_name,
+                        self.session.msg_char_limit,
+                        self.session.name_char_limit,
+                        self.session.allow_user_creation,
+                        self.session.max_shown_messages
+                    ).encode()
+                )
+
             case _:
                 log.err("Improper Request")
                 self.transport.write(error_message("Improper request.").encode())

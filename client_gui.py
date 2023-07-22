@@ -4,6 +4,66 @@ from twisted.internet import reactor
 from packet import *
 
 
+class ServerInfoDialog(customtkinter.CTkToplevel):
+    def __init__(self,
+                 master,
+                 server_name,
+                 char_limit,
+                 name_char_limit,
+                 user_creation_allowed,
+                 max_shown,
+                 title="Server Info",
+                 *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.server_name = server_name
+        self.char_limit = char_limit
+        self.name_char_limit = name_char_limit
+        self.user_creation_allowed = user_creation_allowed
+        self.max_shown = max_shown
+        self.master = master
+        x = self.master.winfo_x()
+        y = self.master.winfo_y()
+        self.geometry("+%d+%d" % (x + 500, y + 100))
+        self.attributes("-topmost", True)
+        self.resizable(False, False)
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        self.title(title)
+        self.lift()
+        self.after(10, self.create_widgets)
+        self.grab_set()
+
+    def create_widgets(self):
+        """
+        Creates the username and password widgets.
+        :return:
+        """
+        info_labels = [
+            f"Name: {self.server_name}",
+            f"Message Character Limit: {self.char_limit}",
+            f"Name Character Limit: {self.name_char_limit}",
+            f"Can Create Users: {self.user_creation_allowed}",
+            f"Max Sent Messages: {self.max_shown}"
+        ]
+        for i in range(len(info_labels)):
+            info = info_labels[i]
+            text_label = customtkinter.CTkLabel(
+                master=self,
+                width=400,
+                fg_color="transparent",
+                text=info,
+                font=("Arial", 25)
+            )
+            text_label.grid(row=i, column=0, padx=(15, 0), pady=15, columnspan=2)
+
+        close_button = customtkinter.CTkButton(self, text="Ok", command=self.on_closing)
+        close_button.grid(row=len(info_labels), column=0, padx=15, pady=15)
+
+    def on_closing(self):
+        self.grab_release()
+        self.destroy()
+
+
 class Popup(customtkinter.CTkToplevel):
     def __init__(self, master, text, title="Credentials", *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,8 +88,7 @@ class Popup(customtkinter.CTkToplevel):
         """
         text_label = customtkinter.CTkLabel(
             master=self,
-            width=150,
-            wraplength=150,
+            width=300,
             fg_color="transparent",
             text=self.text,
             font=("Arial", 25)
@@ -43,10 +102,14 @@ class Popup(customtkinter.CTkToplevel):
         self.grab_release()
         self.destroy()
 
+
 class CredentialsPopup(customtkinter.CTkToplevel):
     def __init__(self, master, title="Credentials", username_prompt="Username", password_prompt="Password", *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.master = master
+        x = self.master.winfo_x()
+        y = self.master.winfo_y()
+        self.geometry("+%d+%d" % (x + 500, y + 100))
         self.username_prompt = username_prompt
         self.password_prompt = password_prompt
         self.credentials = None
@@ -191,11 +254,16 @@ class ScrollableMessageBox(customtkinter.CTkScrollableFrame):
 
 
 class ClientApp(customtkinter.CTk):
-    def __init__(self, client):
+    def __init__(self, client, server_name, char_limit, name_char_limit, user_creation_allowed, max_shown):
         super().__init__()
+        self.server_name = server_name
+        self.char_limit = char_limit
+        self.name_char_limit = name_char_limit
+        self.user_creation_allowed = user_creation_allowed
+        self.max_shown = max_shown
         self.client = client
 
-        self.title("Messenger Client")
+        self.title(self.server_name)
         self.grid_rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
@@ -247,6 +315,7 @@ class ClientApp(customtkinter.CTk):
         :return:
         """
         buttons = [
+            ("Info", self.server_info),
             ("Login", self.login_popup),
             ("Reload", self.resend_message_log),
             ("Logout", self.logout),
@@ -266,6 +335,13 @@ class ClientApp(customtkinter.CTk):
             if i == len(buttons) - 1:
                 padding_y = (0, 0)
             button.grid(row=i, column=0, pady=padding_y)
+
+    def server_info(self):
+        """
+        Pops up a window to showcase server info.
+        :return:
+        """
+        ServerInfoDialog(self, self.server_name, self.char_limit, self.name_char_limit, self.user_creation_allowed, self.max_shown)
 
     def credentials_popup(self, username_prompt, password_prompt):
         """
@@ -312,6 +388,9 @@ class ClientApp(customtkinter.CTk):
         When the user presses the "Create user" button.
         :return:
         """
+        if not self.user_creation_allowed:
+            Popup(self, "Server does not allow user creation.", "Error")
+
         dialog = CredentialsPopup(
             self,
             title="Create new user",

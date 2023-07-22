@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import sys
-from packet import JsonPacket, PacketType
+from packet import JsonPacket, PacketType, server_info_request
 from constants import STANDARD_PORT
 from twisted.internet import reactor, tksupport
 from twisted.python import log
@@ -17,10 +17,8 @@ class Client(Protocol):
         self.gui = None
 
     def connectionMade(self):
-        customtkinter.set_default_color_theme("blue")
-        customtkinter.set_appearance_mode("dark")
-        self.gui = ClientApp(self)
-        tksupport.install(self.gui)
+        log.msg("Asking server for info...")
+        self.transport.write(server_info_request().encode())
 
     def dataReceived(self, data):
         try:
@@ -35,6 +33,19 @@ class Client(Protocol):
                 Popup(title="Session Error", text=message.content, master=self.gui)
             elif message.type == PacketType.SUCCESS:
                 Popup(title="Success", text="Success.", master=self.gui)
+            elif message.type == PacketType.SERVER_INFO:
+                log.msg("Got server info. Starting client...")
+                customtkinter.set_default_color_theme("blue")
+                customtkinter.set_appearance_mode("dark")
+                self.gui = ClientApp(
+                    self,
+                    message.server_name,
+                    message.char_limit,
+                    message.name_char_limit,
+                    message.user_creation_allowed,
+                    message.max_shown,
+                )
+                tksupport.install(self.gui)
         except Exception as e:
             Popup(title="Client Error", text="An error has occurred with the client.", master=self.gui)
             traceback.print_exc()

@@ -1,5 +1,6 @@
 # Put this file in the same directory as the server.
 port = 49153  # Port to host on. Standard is 49153. Only matters outside of a docker installation.
+server_name = "Messenger Server"  # Name of this server to be shown to clients
 
 [structure]
     data_folder= "./persistent"  # Path to the directory to put our data in. If one doesn't exist, it will created.

@@ -16,6 +16,8 @@ class PacketType(Enum):
     MESSAGE_LOG_SET_REQUEST = "MESSAGE_LOG_SET_REQUEST"  # A way for clients to request to be sent a new message log set
     MESSAGE_LOG_ADDITION = "MESSAGE_LOG_ADDITION"  # Adds a new entry into the logs of each client.
     CREATE_USER = "CREATE_USER"  # Adds a new entry into the logs of each client.
+    SERVER_INFO = "SERVER_INFO"  # The info the server sends to it's users about itself.
+    SERVER_INFO_REQUEST = "SERVER_INFO_REQUEST"  # Asks the server for info about itself.
 
 
 class JsonPacket:
@@ -76,6 +78,29 @@ class JsonPacket:
 
     def __str__(self):
         return str(vars(self))
+
+
+def server_info_request():
+    """
+    Function to request a server for it's info.
+    :return:
+    """
+    return JsonPacket(PacketType.SERVER_INFO_REQUEST)
+
+
+def server_info(server_name: str, char_limit: int, name_char_limit: int, user_creation_allowed: bool, max_shown: int):
+    """
+    A function that a JsonPacket ready to be sent to a client.
+    :return:
+    """
+    return JsonPacket(
+        PacketType.SERVER_INFO,
+        server_name=server_name,
+        char_limit=char_limit,
+        name_char_limit=name_char_limit,
+        user_creation_allowed=user_creation_allowed,
+        max_shown=max_shown
+    )
 
 
 def login_message(user, password):

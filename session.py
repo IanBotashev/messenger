@@ -56,6 +56,7 @@ class Message:
 class ServerSession:
     def __init__(self):
         # Default settings.
+        self.server_name = "Messenger Server"
         self.server_user_name = "server"
         self.server_user_pass = "admin"
         self.allow_user_creation = False
@@ -82,6 +83,7 @@ class ServerSession:
         """
         config = toml.load(name)
         # Filthy, yes.
+        self.server_name = config['server_name']
         self.server_user_name = config['session']['server_user']['name']
         self.server_user_pass = config['session']['server_user']['password']
         self.database = os.path.join(config['structure']['data_folder'], config['structure']['db'])
