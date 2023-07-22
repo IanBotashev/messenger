@@ -1,5 +1,10 @@
+# Put this file in the same directory as the server.
 port = 49153  # Port to host on. Standard is 49153. Only matters outside of a docker installation.
-log_file = "persistent/server.log" # For local installations, this can be changed to anywhere.
+
+[structure]
+    data_folder= "./persistent"  # Path to the directory to put our data in. If one doesn't exist, it will created.
+    log_file = "server.log"
+    db = "messenger.db"  # Name of the database file to use. If it doesn't exist, one will be created.
 
 # Session settings.
 [session]
@@ -10,7 +15,6 @@ log_file = "persistent/server.log" # For local installations, this can be change
 
     # Database currently is SQLite3.
     [session.database]
-        db = "persistent/messenger.db"  # Name of the database file to use. If it doesn't exist, one will be created.
         allow_user_creation = true  # Allows anonymous connections to create accounts.
         max_shown_messages = 100  # Max amount of messages in the catalog to be sent to a client.
         message_character_limit = 200  # The maximum length of a message that can be posted by a client.
@@ -22,4 +26,4 @@ log_file = "persistent/server.log" # For local installations, this can be change
         leave = "{user} has left."  # For when a user logs out.
         join = "{user} has joined."  # For when an anonymous connection logs itself in.
         abrupt_leave = "{user} left unexpectedly."  # When a user leaves without logging out first.
-        # It might mean that it was abrupt; or just that they forgot to log out before leaving.
+        # It MIGHT mean that it was abrupt; or just that they forgot to log out before leaving.

@@ -18,5 +18,6 @@ RUN python -m pip install -r requirements.txt  # Install dependencies
 # Expose the port that the application listens on.
 EXPOSE 49153
 
+ENV MESSENGER_RUNNING_IN_DOCKER Yes
 # Run the application.
 CMD ./server.py

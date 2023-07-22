@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import sys
 from twisted.internet import protocol, reactor
 from twisted.internet.endpoints import TCP4ServerEndpoint
@@ -8,7 +9,7 @@ from twisted.python import log
 import traceback
 from errors import SessionError
 import toml
-from constants import CONFIG_FILE
+from constants import CONFIG_FILE, DOCKER_ENV_KEY
 
 
 class MessagingProtocol(protocol.Protocol):
@@ -124,8 +125,34 @@ class MessagingFactory(protocol.ServerFactory):
         return MessagingProtocol(self.session)
 
 
+def folder_check(config):
+    """
+    If we're not in a container, make our data folder exists. If not, create it.
+    Can't log, since our log file is in the data folder. Instead we print everything normally to the console.
+    :param config:
+    :return:
+    """
+    in_docker = os.getenv(DOCKER_ENV_KEY)
+    data_folder = config['structure']['data_folder']
+    if not in_docker and not os.path.exists(f"{data_folder}"):
+        print("Not in docker container, and persistent folder does not exist. Creating...")
+        os.mkdir(f'{data_folder}')
+
+
+def get_log_file(config):
+    """
+    Gets the location of the log file for this server.
+    :param config:
+    :return:
+    """
+    return os.path.join(config['structure']['data_folder'], config['structure']['log_file'])
+
+
 if __name__ == "__main__":
-    log.startLogging(open(toml.load(CONFIG_FILE)['log_file'], 'w'))
+    config = toml.load(CONFIG_FILE)
+    folder_check(config)
+    log.startLogging(open(get_log_file(config), 'w'))
+
     endpoint = TCP4ServerEndpoint(reactor, toml.load(CONFIG_FILE)['port'])
     endpoint.listen(MessagingFactory())
     reactor.run()

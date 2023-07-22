@@ -1,3 +1,4 @@
+import os
 import time
 from errors import SessionError
 import sqlite3
@@ -83,7 +84,7 @@ class ServerSession:
         # Filthy, yes.
         self.server_user_name = config['session']['server_user']['name']
         self.server_user_pass = config['session']['server_user']['password']
-        self.database = config['session']['database']['db']
+        self.database = os.path.join(config['structure']['data_folder'], config['structure']['db'])
         self.allow_user_creation = config['session']['database']['allow_user_creation']
         self.msg_char_limit = config['session']['database']['message_character_limit']
         self.name_char_limit = config['session']['database']['username_character_limit']

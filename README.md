@@ -26,32 +26,36 @@ To run the client, use the following command:
 
 ### Server
 #### Terminal
-To run the server on your machine you first must create a new folder titled "persistent" 
-(or change the `config.toml` lines `log_file` and `session.database.db` to not have the `persistent/`)
+To run the server on your machine:
 ```shell
-mkdir persistent 
 ./server.py
 ```
 
 #### Docker
-Using docker compose:
+Using docker compose: (--build only required for the first run.)
 ```shell
-docker compose up
+docker compose up --build --detach
 ```
 
 Using just docker:
 ```shell
 docker build -t messenger-server .
-docker run -p 49153:49153 -v {FULL_PATH}/persistent:/app/persistent -it messenger-server
+docker volume create messenger_data
+docker run -d -p 49153:49153 -v messenger_data:/app/persistent --name messenger-server messenger-server
 ```
-Note: It's entirely possible to switch where to mount the volume and which port to run on, this is just an example.
+Note: It's entirely possible to switch where to mount the volume, this is just an example. Changing port might lead to compatibility issues.
 
 ## Server config.toml
 Example config.toml file for a server.  
 Any changes to the settings file require a server reboot.
 ```toml
+# Put this file in the same directory as the server.
 port = 49153  # Port to host on. Standard is 49153. Only matters outside of a docker installation.
-log_file = "persistent/server.log" # For local installations, this can be changed to anywhere.
+
+[structure]
+    data_folder= "./persistent"  # Path to the directory to put our data in. If one doesn't exist, it will created.
+    log_file = "server.log"
+    db = "messenger.db"  # Name of the database file to use. If it doesn't exist, one will be created.
 
 # Session settings.
 [session]
@@ -62,7 +66,6 @@ log_file = "persistent/server.log" # For local installations, this can be change
 
     # Database currently is SQLite3.
     [session.database]
-        db = "persistent/messenger.db"  # Name of the database file to use. If it doesn't exist, one will be created.
         allow_user_creation = true  # Allows anonymous connections to create accounts.
         max_shown_messages = 100  # Max amount of messages in the catalog to be sent to a client.
         message_character_limit = 200  # The maximum length of a message that can be posted by a client.
@@ -74,5 +77,5 @@ log_file = "persistent/server.log" # For local installations, this can be change
         leave = "{user} has left."  # For when a user logs out.
         join = "{user} has joined."  # For when an anonymous connection logs itself in.
         abrupt_leave = "{user} left unexpectedly."  # When a user leaves without logging out first.
-        # It might mean that it was abrupt; or just that they forgot to log out before leaving.
+        # It MIGHT mean that it was abrupt; or just that they forgot to log out before leaving.
  ```

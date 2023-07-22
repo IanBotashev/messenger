@@ -5,6 +5,8 @@ services:
     ports:
       - 49153:49153
     volumes:
-      - ./persistent:/app/persistent
+      - data:/app/persistent
 
-
+volumes:
+  data:
+    external: false
