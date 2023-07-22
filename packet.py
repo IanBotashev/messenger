@@ -3,7 +3,6 @@ import time
 from enum import Enum
 import json
 import zlib
-import base64
 from session import Message
 
 
@@ -34,7 +33,7 @@ class JsonPacket:
         """
         data = copy.deepcopy(vars(self))
         data['type'] = data['type'].name
-        return base64.b64encode(zlib.compress(json.dumps(data).encode()))
+        return zlib.compress(json.dumps(data).encode())
 
     @staticmethod
     def decode(byte_string):
@@ -43,7 +42,7 @@ class JsonPacket:
         :return:
         """
         packet = JsonPacket()
-        raw_packet = json.loads(zlib.decompress(base64.b64decode(byte_string)))
+        raw_packet = json.loads(zlib.decompress(byte_string))
         raw_packet['type'] = PacketType[raw_packet['type']]
         packet.__dict__ = raw_packet
         return packet
