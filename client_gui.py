@@ -49,15 +49,15 @@ class ServerInfoDialog(customtkinter.CTkToplevel):
             info = info_labels[i]
             text_label = customtkinter.CTkLabel(
                 master=self,
-                width=400,
+                width=200,
                 fg_color="transparent",
                 text=info,
                 font=("Arial", 25)
             )
-            text_label.grid(row=i, column=0, padx=(15, 0), pady=15, columnspan=2)
+            text_label.pack(anchor="nw")
 
         close_button = customtkinter.CTkButton(self, text="Ok", command=self.on_closing)
-        close_button.grid(row=len(info_labels), column=0, padx=15, pady=15)
+        close_button.pack()
 
     def on_closing(self):
         self.grab_release()
