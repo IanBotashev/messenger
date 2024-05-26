@@ -50,7 +50,8 @@ class Message:
         """
         args = string.split(":")
         print(args)
-        return Message(int(args[0]), User(args[1]), args[2], ":".join(args[3:]))
+        print(Message(int(args[0]), User(args[1]), ":".join(args[3:]), args[2]))
+        return Message(int(args[0]), User(args[1]), ":".join(args[3:]), args[2])
 
 
 class ServerSession:
