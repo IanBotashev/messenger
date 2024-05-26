@@ -19,7 +19,7 @@ class User:
 
 
 class Message:
-    def __init__(self, id: int, user: User, timestamp, message: str):
+    def __init__(self, id: int, user: User, message: str, timestamp):
         """
         Represents a message from one user.
         :param id:
@@ -50,7 +50,7 @@ class Message:
         """
         args = string.split(":")
         print(args)
-        return Message(int(args[0]), User(args[1]), args[2], args[3:])
+        return Message(int(args[0]), User(args[1]), args[2], ":".join(args[3:]))
 
 
 class ServerSession:
