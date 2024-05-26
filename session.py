@@ -225,6 +225,9 @@ class ServerSession:
         if username in self.get_all_usernames():
             raise SessionError("Username already taken.")
 
+        if ":" in username:
+            raise SessionError("Usernames cannot use the character ':' in them.")
+
         query = "INSERT INTO users(name, password) VALUES (?, ?);"
         cur = self.con.cursor()
         cur.execute(query, (username, password))
