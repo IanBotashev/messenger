@@ -19,7 +19,7 @@ class User:
 
 
 class Message:
-    def __init__(self, id: int, user: User, message: str, timestamp):
+    def __init__(self, id: int, user: User, timestamp, message: str):
         """
         Represents a message from one user.
         :param id:
@@ -39,7 +39,7 @@ class Message:
         return self.timestamp < other.timestamp
 
     def __repr__(self):
-        return f"{self.id}:{self.sender.name}:{self.message}:{self.timestamp}"
+        return f"{self.id}:{self.sender.name}:{self.timestamp}:{self.message}"
 
     @staticmethod
     def from_string(string):
@@ -50,7 +50,7 @@ class Message:
         """
         args = string.split(":")
         print(args)
-        return Message(int(args[0]), User(args[1]), args[2], args[3])
+        return Message(int(args[0]), User(args[1]), args[2], args[3:])
 
 
 class ServerSession:
